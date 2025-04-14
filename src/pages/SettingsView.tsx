@@ -1,7 +1,12 @@
 import { Settings } from "lucide-react";
 import KeyManagementPanel from "../components/settings/KeyManagementPanel";
+import AuthenticationPanel from "../components/settings/AuthenticationPanel";
 
-export default function SettingsView () {
+type SettingsViewProps = {
+  onLogout: () => void;
+}
+
+export default function SettingsView ({ onLogout }: SettingsViewProps) {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center mb-6">
@@ -65,6 +70,8 @@ export default function SettingsView () {
       </div>
       
       <KeyManagementPanel />
+
+      <AuthenticationPanel onLogout={onLogout} />
       
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mb-6">
         <div className="px-4 py-5 sm:p-6">
