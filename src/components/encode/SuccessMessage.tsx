@@ -1,7 +1,11 @@
 import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function SuccessMessage() {
+interface SuccessMessageProps {
+  onDownload: () => void;
+}
+
+export default function SuccessMessage({ onDownload }: SuccessMessageProps) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 30, height: 0 }}
@@ -46,6 +50,7 @@ export default function SuccessMessage() {
           transition={{ delay: 0.7, duration: 0.3 }}
           whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" }}
           whileTap={{ scale: 0.95 }}
+          onClick={onDownload}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 gap-2"
         >
           <motion.div
@@ -59,4 +64,4 @@ export default function SuccessMessage() {
       </div>
     </motion.div>
   );
-} 
+}

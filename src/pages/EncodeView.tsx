@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Header from "../components/encode/Header";
 import ErrorMessage from "../components/encode/ErrorMessage";
@@ -7,6 +7,8 @@ import SecretForm from "../components/encode/SecretForm";
 import SecurityIndicator from "../components/encode/SecurityIndicator";
 import ActionButtons from "../components/encode/ActionButtons";
 import SuccessMessage from "../components/encode/SuccessMessage";
+import Steganography from "../utils/steganography";
+import { keyManager } from "../utils/keyManager";
 
 export default function EncodeView() {
   const [image, setImage] = useState<File | null>(null);
@@ -14,10 +16,29 @@ export default function EncodeView() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [encryptionLevel, setEncryptionLevel] = useState("standard");
+  const [encryptionLevel, setEncryptionLevel] = useState<"standard" | "enhanced">("standard");
   const [errorMessage, setErrorMessage] = useState("");
   const [isEncoding, setIsEncoding] = useState(false);
   const [encodingComplete, setEncodingComplete] = useState(false);
+  const [encodedImage, setEncodedImage] = useState<Blob | null>(null);
+  const [keyExists, setKeyExists] = useState(false);
+
+  const changeEncryptionLevel = (value: string) => {
+    setEncryptionLevel(value as "standard" | "enhanced");
+  };
+  
+  useEffect(() => {
+    const checkKey = async () => {
+      const exists = await keyManager.keyExists();
+      setKeyExists(exists);
+      
+      if (!exists) {
+        setErrorMessage("No encryption key found. Please set up a key in Settings before encoding.");
+      }
+    };
+    
+    checkKey();
+  }, []);
 
   const handleImageUpload = (file: File) => {
     setImage(file);
@@ -30,14 +51,20 @@ export default function EncodeView() {
     
     setEncodingComplete(false);
     setErrorMessage("");
+    setEncodedImage(null);
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!keyExists) {
+      setErrorMessage("No encryption key found. Please set up a key in Settings before encoding.");
+      return;
+    }
     
     if (!image) {
       setErrorMessage("Please select an image first");
@@ -57,10 +84,21 @@ export default function EncodeView() {
     setErrorMessage("");
     setIsEncoding(true);
     
-    setTimeout(() => {
-      setIsEncoding(false);
+    try {
+      const result = await Steganography.hideData(
+        image,
+        password,
+        encryptionLevel
+      );
+      
+      setEncodedImage(result);
       setEncodingComplete(true);
-    }, 2000);
+    } catch (error) {
+      console.error("Error encoding image:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred");
+    } finally {
+      setIsEncoding(false);
+    }
   };
 
   const resetForm = () => {
@@ -70,6 +108,20 @@ export default function EncodeView() {
     setConfirmPassword("");
     setEncodingComplete(false);
     setErrorMessage("");
+    setEncodedImage(null);
+  };
+
+  const downloadEncodedImage = () => {
+    if (encodedImage && image) {
+      const url = URL.createObjectURL(encodedImage);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `encoded_${image.name}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -99,7 +151,7 @@ export default function EncodeView() {
             onPasswordChange={setPassword}
             onConfirmPasswordChange={setConfirmPassword}
             onTogglePasswordVisibility={togglePasswordVisibility}
-            onEncryptionLevelChange={setEncryptionLevel}
+            onEncryptionLevelChange={changeEncryptionLevel}
           />
         </div>
 
@@ -112,7 +164,9 @@ export default function EncodeView() {
         />
       </form>
       
-      {encodingComplete && <SuccessMessage />}
+      {encodingComplete && encodedImage && (
+        <SuccessMessage onDownload={downloadEncodedImage} />
+      )}
     </motion.div>
   );
 }
