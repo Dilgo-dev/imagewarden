@@ -119,6 +119,51 @@ ipcMain.handle('get-encryption-key', async (_, args) => {
   }
 });
 
+// Authentication IPC handlers
+ipcMain.handle('save-auth', async (_, args) => {
+  try {
+    const { hashedPassword, storageKey } = args;
+    const masterKey = getMasterKey();
+    const encryptedPassword = encryptData(hashedPassword, masterKey);
+    const authPath = path.join(SECURE_STORAGE_PATH, `${storageKey}.auth`);
+    
+    fs.writeFileSync(authPath, encryptedPassword);
+    return true;
+  } catch (error) {
+    console.error('Failed to save authentication data:', error);
+    return false;
+  }
+});
+
+ipcMain.handle('get-auth', async (_, args) => {
+  try {
+    const { storageKey } = args;
+    const authPath = path.join(SECURE_STORAGE_PATH, `${storageKey}.auth`);
+    
+    if (!fs.existsSync(authPath)) {
+      return null;
+    }
+    
+    const encryptedPassword = fs.readFileSync(authPath, 'utf8');
+    const masterKey = getMasterKey();
+    return decryptData(encryptedPassword, masterKey);
+  } catch (error) {
+    console.error('Failed to retrieve authentication data:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('has-auth', async (_, args) => {
+  try {
+    const { storageKey } = args;
+    const authPath = path.join(SECURE_STORAGE_PATH, `${storageKey}.auth`);
+    return fs.existsSync(authPath);
+  } catch (error) {
+    console.error('Failed to check authentication existence:', error);
+    return false;
+  }
+});
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
