@@ -18,7 +18,6 @@ export default function DecodeView() {
     setError(null);
     setSelectedImage(file);
     
-    // Create preview URL
     const reader = new FileReader();
     reader.onload = () => {
       setPreviewUrl(reader.result as string);
@@ -36,7 +35,6 @@ export default function DecodeView() {
     setError(null);
 
     try {
-      // Use the Steganography utility to extract the hidden password
       const extracted = await Steganography.extractData(selectedImage);
       setDecodedPassword(extracted);
     } catch (err) {
