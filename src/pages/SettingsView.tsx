@@ -1,4 +1,5 @@
 import { Settings } from "lucide-react";
+import KeyManagementPanel from "../components/settings/KeyManagementPanel";
 
 export default function SettingsView () {
   return (
@@ -62,6 +63,8 @@ export default function SettingsView () {
           </div>
         </div>
       </div>
+      
+      <KeyManagementPanel />
       
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden mb-6">
         <div className="px-4 py-5 sm:p-6">
