@@ -1,6 +1,6 @@
-interface ErrorMessageProps {
+type ErrorMessageProps = {
   error: string | null;
-}
+};
 
 export default function ErrorMessage({ error }: ErrorMessageProps) {
   if (!error) return null;

@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import { ImageIcon } from "lucide-react";
 
-interface ImageUploaderProps {
+type ImageUploaderProps = {
   selectedImage: File | null;
   previewUrl: string | null;
   onImageSelect: (file: File) => void;
-}
+};
 
 export default function ImageUploader({ selectedImage, previewUrl, onImageSelect }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);

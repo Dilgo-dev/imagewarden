@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Eye, EyeOff, Clipboard, Check } from "lucide-react";
 
-interface PasswordDisplayProps {
+type PasswordDisplayProps = {
   decodedPassword: string;
-}
+};
 
 export default function PasswordDisplay({ decodedPassword }: PasswordDisplayProps) {
   const [showPassword, setShowPassword] = useState(false);

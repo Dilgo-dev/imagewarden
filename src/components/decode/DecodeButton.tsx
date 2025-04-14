@@ -1,10 +1,10 @@
 import { Download } from "lucide-react";
 
-interface DecodeButtonProps {
+type DecodeButtonProps = {
   isDecoding: boolean;
   hasImage: boolean;
   onDecode: () => void;
-}
+};
 
 export default function DecodeButton({ isDecoding, hasImage, onDecode }: DecodeButtonProps) {
   return (
